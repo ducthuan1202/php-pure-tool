@@ -36,7 +36,7 @@ if (!function_exists('get_useragent')) {
 if (!function_exists('get_method')) {
     function get_method()
     {
-        return arr_get($_SERVER, 'REQUEST_METHOD', Request::METHOD_GET);
+        return strtoupper(arr_get($_SERVER, 'REQUEST_METHOD', Request::METHOD_GET));
     }
 }
 
@@ -61,7 +61,7 @@ if (!function_exists('get_param')) {
             return $_GET[$key];
         endif;
 
-        return $_GET;
+        return arr_get($_GET, $key);
     }
 }
 
@@ -72,7 +72,7 @@ if (!function_exists('post_param')) {
             return $_POST[$key];
         endif;
 
-        return $_POST;
+        return arr_get($_POST, $key);
     }
 }
 
@@ -134,7 +134,7 @@ if (!function_exists('config')) {
 }
 
 if (!function_exists('arr_get')) {
-    function arr_get(array $arr, string $key, $def = null)
+    function arr_get(array $arr, $key, $def = null)
     {
         if (array_key_exists($key, $arr)) {
             return $arr[$key];
@@ -215,5 +215,12 @@ if (!function_exists('error_handler')) {
         echo sprintf("<p>File: %s at line %s</p>", $errfile, $errline);
 
         exit();
+    }
+}
+
+if (!function_exists('get_title_from_txt')) {
+    function get_title_from_txt($txt)
+    {
+        return preg_match('/<title[^>]*>(.*?)<\/title>/ims', $txt, $matches) ? $matches[1] : null;
     }
 }

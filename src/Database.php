@@ -4,6 +4,7 @@ namespace Src;
 
 class Database
 {
+    /** @var \PDO */
     private static $conn;
 
     private static function init()
@@ -19,6 +20,7 @@ class Database
         $dsn = sprintf('mysql:host=%s;dbname=%s;charset=%s;port=%d', $host, $name, $charset, $port);
         self::$conn = new \PDO($dsn, $user, $pass);
         self::$conn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        self::$conn->lastInsertId();
     }
 
     public static function getConnect()
@@ -41,18 +43,37 @@ class Database
         return $stmt->fetch();
     }
 
+    /**
+     * @param string $sql
+     * @param array $bindParams
+     *
+     * @return string
+     */
     public static function insert($sql, $bindParams = [])
     {
+        /** @var \PDO $stmt */
         $stmt = self::execute($sql, $bindParams);
         return $stmt->lastInsertId();
     }
 
+    /**
+     * @param string $sql
+     * @param array $bindParams
+     *
+     * @return int
+     */
     public static function update($sql, $bindParams = [])
     {
         $stmt = self::execute($sql, $bindParams);
         return $stmt->rowCount();
     }
 
+    /**
+     * @param string $sql
+     * @param array $bindParams
+     *
+     * @return bool|\PDOStatement
+     */
     public static function delete($sql, $bindParams = [])
     {
         $stmt = Database::getConnect()->prepare($sql);
@@ -60,6 +81,12 @@ class Database
         return self::execute($sql, $bindParams);
     }
 
+    /**
+     * @param callable $fn
+     *
+     * @return mixed
+     * @throws \Exception
+     */
     public static function transaction(callable $fn)
     {
         $conn = Database::getConnect();
@@ -75,6 +102,12 @@ class Database
         }
     }
 
+    /**
+     * @param string $sql
+     * @param array $bindParams
+     *
+     * @return bool|\PDOStatement
+     */
     private static function query($sql, $bindParams = [])
     {
         $stmt = self::execute($sql, $bindParams);
@@ -82,6 +115,12 @@ class Database
         return $stmt;
     }
 
+    /**
+     * @param string $sql
+     * @param array $bindParams
+     *
+     * @return bool|\PDOStatement
+     */
     private static function execute($sql, $bindParams = [])
     {
         $stmt = Database::getConnect()->prepare($sql);
@@ -90,6 +129,10 @@ class Database
         return $stmt;
     }
 
+    /**
+     * @param \PDOStatement $stmt
+     * @param array $params
+     */
     private static function bindParams($stmt, $params)
     {
         if (empty($params)) {

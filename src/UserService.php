@@ -12,7 +12,7 @@ class UserService
 
     public static function getUserById($id)
     {
-        $sql = "SELECT * FROM users WHERE id = :id";
+        $sql = 'SELECT * FROM users WHERE id = :id';
         return Database::findOne($sql, [':id' => $id]);
     }
 

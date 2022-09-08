@@ -1,5 +1,6 @@
 <?php
 
+
 session_start();
 
 if (version_compare(PHP_VERSION, '5.6', '<')) {
@@ -34,11 +35,8 @@ if (is_debug()) {
     ini_set('display_errors', 1);
 }
 
-$users = Src\UserService::getUsers();
-dump($users);
 
-$admin = Src\UserService::getUserById(1);
-dump($admin);
-
-$result = Src\UserService::updateWithTransaction();
-dump($result);
+$ahref = new \Src\AhrefService();
+//$ahref->login();
+$ahref->getWorkspace('M%2Bpxc5WJIwz8NcnHwGxX97ZkN3KS%2FPoLyWRcgHj%2B');
+//$ahref->getTitle('https://app.ahrefs.com/user/login');

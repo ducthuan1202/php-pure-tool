@@ -1,0 +1,17 @@
+app:
+  env: dev
+  timezone: UTC
+  name: Tool
+  debug: true
+database:
+  host: localhost
+  port: 3306
+  username: your_username
+  password: your_password
+  charset: utf8mb4
+  dbname: db_name
+accounts:
+  ahrefs:
+    email: your_email
+    password: your_password
+

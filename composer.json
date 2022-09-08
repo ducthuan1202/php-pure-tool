@@ -22,13 +22,14 @@
     ],
     "project-prepare": [
       "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
-      "@php -r \"file_exists('configs.yaml') || copy('configs.yaml.example', 'configs.yaml');\""
+      "@php -r \"file_exists('configs.yaml') || copy('configs.example.yaml', 'configs.yaml');\""
     ]
   },
   "require-dev": {
     "symfony/var-dumper": "^5.4"
   },
   "require": {
-    "symfony/yaml": "^5.4"
+    "symfony/yaml": "^5.4",
+    "guzzlehttp/guzzle": "^7.5"
   }
 }
