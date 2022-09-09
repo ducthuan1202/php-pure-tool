@@ -179,7 +179,7 @@ if (!function_exists('arr_get')) {
 }
 
 if (!function_exists('exception_handler')) {
-    function exception_handler(Exception $exception)
+    function exception_handler($exception)
     {
         if (!is_debug()) {
             exit('Ops, something went wrong!');

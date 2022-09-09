@@ -1,6 +1,5 @@
 <?php
 
-
 session_start();
 
 if (version_compare(PHP_VERSION, '5.6', '<')) {
@@ -29,14 +28,10 @@ date_default_timezone_set(config('app.timezone'));
 
 if (is_debug()) {
     error_reporting(0);
-    ini_set('display_errors', 0);
+    ini_set('display_errors', false);
 } else {
     error_reporting(E_ALL);
-    ini_set('display_errors', 1);
+    ini_set('display_errors', true);
 }
 
-
-$ahref = new \Src\AhrefService();
-//$ahref->login();
-$ahref->getWorkspace('M%2Bpxc5WJIwz8NcnHwGxX97ZkN3KS%2FPoLyWRcgHj%2B');
-//$ahref->getTitle('https://app.ahrefs.com/user/login');
+new Src\App();

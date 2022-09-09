@@ -1,10 +1,6 @@
 <?php
 
-
 namespace Src;
-
-
-use GuzzleHttp\Client;
 
 class AhrefService
 {
@@ -35,73 +31,29 @@ class AhrefService
         URI_PM_ADD_PROJECT = 'pmAddProject',
         URI_BATCH_ANALYSIS = 'batch-analysis';
 
-    const
-        TITLE_LOGIN = 'Ahrefs user login';
+    const TITLE_LOGIN = 'Ahrefs user login';
 
     private function buildUrlFromUri($uri)
     {
         return sprintf('%s/%s', self::URL_APP_V4, $uri);
     }
 
-    private function commonOptionsCurl()
-    {
-        $cookieFile = ROOT_PATH.'./cc.txt';
-        return [
-            CURLOPT_CONNECTTIMEOUT => 5,
-            CURLOPT_SSL_VERIFYHOST => 2,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_VERBOSE => true,
-            CURLOPT_REFERER => $this->buildUrlFromUri(self::URI_DASHBOARD),
-            CURLOPT_HTTPHEADER => [
-                'Content-Type: application/json',
-                'Origin: ' . self::URL_APP,
-                'Referer: ' . $this->buildUrlFromUri(self::URI_DASHBOARD),
-            ],
-            CURLOPT_USERAGENT => Request::USERAGENT_EDGE,
-            CURLOPT_COOKIEFILE => $cookieFile,
-            CURLOPT_COOKIEJAR => $cookieFile,
-        ];
-    }
-
-    private function post($url, $payload = [], $optionsExtra = [])
-    {
-        $options = $this->commonOptionsCurl();
-
-        if (is_array($payload) && count($payload) > 0) {
-            $options[CURLOPT_POST] = true;
-            $options[CURLOPT_POSTFIELDS] = json_encode($payload);
-        }
-
-        if(is_array($optionsExtra) && count($optionsExtra) > 0){
-            foreach ($optionsExtra as $key => $value){
-                $options[$key] = $value;
-            }
-        }
-
-        return $this->run($url, $options);
-    }
-
-    private function run($url, $options)
-    {
-        $curl = curl_init($url);
-        curl_setopt_array($curl, $options);
-
-        $data = curl_exec($curl);
-        $info = curl_getinfo($curl);
-        $error = curl_error($curl);
-        curl_close($curl);
-
-        return [
-            'data' => json_decode($data, true),
-            'info' => $info,
-            'error' => $error,
-        ];
-    }
-
     public function login()
     {
+        $cookieFile = ROOT_PATH . './cc.txt';
+
+        $options = [
+            CURLOPT_REFERER => $this->buildUrlFromUri(self::URI_DASHBOARD),
+            CURLOPT_COOKIEFILE => $cookieFile,
+            CURLOPT_COOKIEJAR => $cookieFile,
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: text/plain;charset=UTF-8',
+                'Host: https://app.ahrefs.com',
+                'Origin: https://app.ahrefs.com',
+                'Referer: https://app.ahrefs.com/',
+            ],
+        ];
+
         $payload = [
             'remember_me' => true,
             'auth' => [
@@ -110,48 +62,29 @@ class AhrefService
             ]
         ];
 
-        $loginResponse = $this->post(self::URL_LOGIN_AUTH, $payload);
-        dump($loginResponse);
+        $curl = new Curl();
+        $loginResponse = $curl->post(self::URL_LOGIN_AUTH, $options, $payload);
+        if ($loginResponse->getHttpCode() !== Response::HTTP_OK) {
+            dump($loginResponse);
+            exit('login fail'. $loginResponse->getError());
+        }
 
-        $sessionId = arr_get($loginResponse, 'data.result.session_id');
+        $data = $loginResponse->getData();
+        if (!is_array($data)) {
+            exit('login data invalid');
+        }
 
+        $sessionId = arr_get($loginResponse, $data);
         if (!empty($sessionId)) {
-            $checkCompletionResponse = $this->loginCheckCompletion($sessionId);
+            $checkCompletionResponse = $this->loginCheckCompletion();
             dump($checkCompletionResponse);
         }
     }
 
-    public function loginCheckCompletion($sessionId)
+    public function loginCheckCompletion()
     {
-        dump($sessionId);
-
         $url = $this->buildUrlFromUri(self::URI_LOGIN_CHECK_COMPLETION);
-
-        return $this->post($url, [], []);
-    }
-
-    public function getWorkspace($sessionId)
-    {
-
-        dump($sessionId);
-
-        $url = $this->buildUrlFromUri(self::URI_AS_GET_WORKSPACES);
-        $data = $this->post($url);
-
-        return $data;
-    }
-
-    public function getTitle($url)
-    {
-        $client = new Client([
-            'timeout' => 3,
-        ]);
-
-        $response = $client->request(Request::METHOD_GET, $url);
-
-        if ($response->getStatusCode() === 200) {
-            $stringBody = (string)$response->getBody();
-            dump(get_title_from_txt($stringBody));
-        }
+        $curl = new Curl();
+        return $curl->post($url, [], []);
     }
 }
